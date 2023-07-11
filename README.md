@@ -1,109 +1,46 @@
-# Try Out Development Containers: .NET
+# Intro to Quantum Software Development
 
-[![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/microsoft/vscode-remote-try-dotnet)
+Copyright 2023 The MITRE Corporation. All Rights Reserved.
 
+---
 
-A **development container** is a running container with a well-defined tool/runtime stack and its prerequisites. You can try out development containers with **[GitHub Codespaces](https://github.com/features/codespaces)** or **[Visual Studio Code Dev Containers](https://aka.ms/vscode-remote/containers)**.
+This repository contains coding exercises for MITRE's Intro to Quantum Software Development course. Each lab is a Q# test project with unimplemented operations. Practice your quantum software development skills by implementing each operation so it passes the unit tests.
 
-This is a sample project that lets you try out either option in a few easy steps. We have a variety of other [vscode-remote-try-*](https://github.com/search?q=org%3Amicrosoft+vscode-remote-try-&type=Repositories) sample projects, too.
+The course guide at [stem.mitre.org/quantum](https://stem.mitre.org/quantum/).
 
-> **Note:** If you already have a Codespace or dev container, you can jump to the [Things to try](#things-to-try) section.
+## Visual Studio Setup
 
-## Setting up the development container
+> Only the Windows version of Visual Studio is supported.
 
-### GitHub Codespaces
-Follow these steps to open this sample in a Codespace:
-1. Click the **Code** drop-down menu.
-2. Click on the **Codespaces** tab.
-3. Click **Create codespace on main** .
+1. Download and install the latest [.NET 6.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
 
-For more info, check out the [GitHub documentation](https://docs.github.com/en/free-pro-team@latest/github/developing-online-with-codespaces/creating-a-codespace#creating-a-codespace).
+2. Download and install [Visual Studio Community 2022](https://visualstudio.microsoft.com/vs/community/).
 
-### VS Code Dev Containers
+3. Download and install the [Microsoft Quantum Development Kit Visual Studio 2022 extension](https://marketplace.visualstudio.com/items?itemName=quantum.DevKit64).
 
-If you already have VS Code and Docker installed, you can click the badge above or [here](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/microsoft/vscode-remote-try-dotnet) to get started. Clicking these links will cause VS Code to automatically install the Dev Containers extension if needed, clone the source code into a container volume, and spin up a dev container for use.
+4. Double-click on the `MITRE.QSD.sln` solution file to open it in Visual Studio.
 
-Follow these steps to open this sample in a container using the VS Code Dev Containers extension:
+5. Click Build -> Build Solution (Ctrl+Shift+B) to build all the test projects.
 
-1. If this is your first time using a development container, please ensure your system meets the pre-reqs (i.e. have Docker installed) in the [getting started steps](https://aka.ms/vscode-remote/containers/getting-started).
+6. If the build was successful, all the unit tests will show up in the Test Explorer. Right-click on a test to run or debug it. (If you lose the Test Explorer tab/window, you can find it by clicking View -> Test Explorer.)
 
-2. To use this repository, you can either open the repository in an isolated Docker volume:
+## Visual Studio Code Setup
 
-    - Press <kbd>F1</kbd> and select the **Dev Containers: Try a Sample...** command.
-    - Choose the ".NET Core" sample, wait for the container to start, and try things out!
-        > **Note:** Under the hood, this will use the **Dev Containers: Clone Repository in Container Volume...** command to clone the source code in a Docker volume instead of the local filesystem. [Volumes](https://docs.docker.com/storage/volumes/) are the preferred mechanism for persisting container data.
+> Windows, MacOS, and Linux are supported, however you may experience errors when compiling Q# projects on arm64-based hardware. See [this GitHub issue](https://github.com/microsoft/qsharp-compiler/issues/1362#issuecomment-1191584444) for a possible workaround.
 
-   Or open a locally cloned copy of the code:
+1. Download and install the latest [.NET 6.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
 
-   - Clone this repository to your local filesystem.
-   - Press <kbd>F1</kbd> and select the **Dev Containers: Open Folder in Container...** command.
-   - Select the cloned copy of this folder, wait for the container to start, and try things out!
+2. Download and install [Visual Studio Code](https://code.visualstudio.com/).
 
-3. If you want to enable **HTTPS**, see [enabling HTTPS](#enabling-https) to reuse your local development cert in the container.
+3. Download and install the [Microsoft Quantum Development Kit Visual Studio Code extension](https://marketplace.visualstudio.com/items?itemName=quantum.quantum-devkit-vscode).
 
-## Things to try
+4. Open the repository folder in VS Code.
 
-Once you have this sample opened, you'll be able to work with it like you would locally.
+5. Open the terminal with Ctrl+` and navigate to the directory of the lab you are working on.
 
-Some things to try:
+6. Run the command `dotnet test` to run the unit tests in that project. You can run individual tests using the `--filter` flag, e.g., `dotnet test --filter Exercise1`.
 
-1. **Restore Packages:** When notified by the C# extension to install packages, click Restore to trigger the process from inside the container! You can also execute `dotnet restore` command in a terminal.
+The following VS Code extensions are recommended:
 
-2. **Edit:**
-   - Open `Program.cs`
-   - Try adding some code and check out the language features.
-   - Make a spelling mistake and notice it is detected. The [Code Spell Checker](https://marketplace.visualstudio.com/items?itemName=streetsidesoftware.code-spell-checker) extension was automatically installed because it is referenced in `.devcontainer/devcontainer.json`.
-   - Also notice that the [C#](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp) extension is installed. Tools are installed in the `mcr.microsoft.com/devcontainers/dotnet` image and Dev Container settings and metadata are automatically picked up from [image labels](https://containers.dev/implementors/reference/#labels).
-
-
-4. **Build, Run, and Debug:**
-   - Open `Program.cs`
-   - Add a breakpoint (e.g. on line 16).
-   - Press <kbd>F5</kbd> to launch the app in the container.
-   - Navigate to the weather endpoint, for example, [http://localhost:5000/paris/weather](http://localhost:5000/paris/weather).
-   - Once the breakpoint is hit, try hovering over variables, examining locals, and more.   
-   - Continue (<kbd>F5</kbd>). You can connect to the server in the container by either: 
-      - Clicking on `Open in Browser` in the notification telling you: `Your service running on port 5000 is available`.
-      - Clicking the globe icon in the 'Ports' view. The 'Ports' view gives you an organized table of your forwarded ports, and you can access it with the command **Ports: Focus on Ports View**.
-    - Notice port 5000 in the 'Ports' view is labeled "Hello Remote World." In `devcontainer.json`, you can set `"portsAttributes"`, such as a label for your forwarded ports and the action to be taken when the port is autoforwarded.
-
-   > **Note:** In Dev Containers, you can access your app at `http://localhost:5000` in a local browser. But in a browser-based Codespace, you must click the link from the notification or the `Ports` view so that the service handles port forwarding in the browser and generates the correct URL.
-
-5. **Rebuild or update your container**
-
-   You may want to make changes to your container, such as installing a different version of a software or forwarding a new port. You'll rebuild your container for your changes to take effect. 
-
-   **Open browser automatically:** As an example change, let's update the `portsAttributes` in the `.devcontainer/devcontainer.json` file to open a browser when our port is automatically forwarded.
-   
-   - Open the `.devcontainer/devcontainer.json` file.
-   - Modify the `"onAutoForward"` attribute in your `portsAttributes` from `"notify"` to `"openBrowser"`.
-   - Press <kbd>F1</kbd> and select the **Dev Containers: Rebuild Container** or **Codespaces: Rebuild Container** command so the modifications are picked up.
-
-5. **Install Node.js using a Dev Container Feature:**
-   - Press <kbd>F1</kbd> and select the **Dev Containers: Configure Container Features...** or **Codespaces: Configure Container Features...** command.
-   - Type "node" in the text box at the top.
-   - Check the check box next to "Node.js (via nvm) and yarn" (published by devcontainers) 
-   - Click OK
-   - Press <kbd>F1</kbd> and select the **Dev Containers: Rebuild Container** or **Codespaces: Rebuild Container** command so the modifications are picked up.
-
-## Contributing
-
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
-
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
-## Trademarks
-
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft 
-trademarks or logos is subject to and must follow 
-[Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
-Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
-Any use of third-party trademarks or logos are subject to those third-party's policies.
+- [C#](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp)
+- [.NET Core Test Explorer](https://marketplace.visualstudio.com/items?itemName=formulahendry.dotnet-test-explorer)
