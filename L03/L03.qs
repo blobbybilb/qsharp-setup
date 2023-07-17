@@ -34,9 +34,8 @@ namespace MITRE.QSD.L03 {
     /// qubit.
     operation E01_SwapAmplitues (qubitA : Qubit, qubitB : Qubit) : Unit {
         // Hint: you can do this with a single statement, using one gate.
-        
+        SWAP(qubitA, qubitB);
         // TODO
-        fail "Not implemented.";
     }
 
 
@@ -73,8 +72,11 @@ namespace MITRE.QSD.L03 {
     /// # Remarks
     /// This investigates the combination of arrays and multi-qubit gates.
     operation E02_ReverseRegister (register : Qubit[]) : Unit {
-        // TODO
-        fail "Not implemented.";
+        let reg_length = Length(register);
+
+        for i in 0 .. (reg_length/2 - 1) {
+            SWAP(register[i], register[reg_length-i-1]);
+        }
     }
 
 
@@ -107,7 +109,20 @@ namespace MITRE.QSD.L03 {
         // from there.
         
         // TODO
-        fail "Not implemented.";
+        for register in registers {
+            H(register[0]);
+            CX(register[0], register[1]);
+        }
+
+        Z(registers[1][1]);
+
+        X(registers[2][1]);
+
+        X(registers[3][1]);
+        Z(registers[3][1]);
+
+
+        // Z(register[3][0]);
     }
 
 
@@ -132,8 +147,12 @@ namespace MITRE.QSD.L03 {
     /// This will investigate how to prepare maximally entangled states for an
     /// arbitrary number of qubits.
     operation E04_PrepareGHZState (register : Qubit[]) : Unit {
-        // TODO
-        fail "Not implemented.";
+        H(register[0]);
+        
+        let n = Length(register) - 1;
+        for i in 1 .. n {
+            CX(register[0], register[i]);
+        }
     }
 
 
@@ -152,8 +171,12 @@ namespace MITRE.QSD.L03 {
     /// # Remarks
     /// You will need to use the H, X, Z, and CNOT gates to achieve this.
     operation E05_CombineMultipleGates (register : Qubit[]) : Unit {
-        // TODO
-        fail "Not implemented.";
+        // TODO 0101 0110
+        H(register[2]); // 0000 0010
+        X(register[1]); // 0100 0110
+        CX(register[2], register[3]); // 0100 0111
+        X(register[3]);
+        Z(register[3]);
     }
 
 
@@ -177,8 +200,10 @@ namespace MITRE.QSD.L03 {
         // Hint: Think about what happens to register[1] based on the value of
         // register[0].
 
-        // TODO
-        fail "Not implemented.";
+        // TODO 00 (10 11)
+        // 00 00
+        H(register[0]); // 00 10
+        Controlled H([register[0]], register[1]);
     }
 
 
@@ -209,7 +234,11 @@ namespace MITRE.QSD.L03 {
         // |001> rather than |111>.
         
         // TODO
-        fail "Not implemented.";
+        // 000
+        ApplyToEach(H, register); // 000 001 010 011 100 101 110 111
+        Controlled X(register, target); // 000 001,0 010 011 100 101 110 111,1
+        X(register[0]);
+        X(register[1]);
     }
 
 
@@ -236,8 +265,14 @@ namespace MITRE.QSD.L03 {
         // more approachable. It is possible to prepare this state without
         // using any extra qubits, but this is not necessary.
         
-        // TODO
-        fail "Not implemented.";
+        // 000
+        H(register[0]); // 000 100
+        Controlled H([register[0]], register[1]); // 000 (100 110)
+        Z(register[1]);// 000 (100  -110)
+        // Controlled X([register[1]], );
+        Controlled X([register[0]], register[2]); // 000 (101 -111)
+        Controlled X([register[1]], register[2]); // 000 (101 -110)
+        Controlled X([register[0]], register[1]); // 000 (111 -100)
     }
 
 
@@ -259,7 +294,12 @@ namespace MITRE.QSD.L03 {
     /// A two-qubit register in the |00> state.
     operation C01_ThreeTermsEqualAmp (register : Qubit[]) : Unit {
         // TODO
-        fail "Not implemented.";
+        // 00
+
+        let t = 2.0*ArcCos(Sqrt(1.0 / 3.0));
+        Ry(t, register[0]);
+        Controlled H([register[0]], register[1]);
+        X(register[0]);
     }
 
 
@@ -276,8 +316,14 @@ namespace MITRE.QSD.L03 {
     /// ## register
     /// A three-qubit register in the |000> state.
     operation C02_PrepareWState (register : Qubit[]) : Unit {
-        // TODO
-        fail "Not implemented.";
+        // TODO 000 110 101
+        let t = 2.0*ArcCos(Sqrt(1.0 / 3.0));
+        Ry(t, register[0]); // 1/3 100  2/3 000
+        // X(register[0]); // 1/3 000   2/3 100 - 000 100 100
+        Controlled H([register[0]], register[1]); // 000 100 110
+        Controlled X([register[1]], register[2]); // 000 100 111
+        Controlled X([register[0]], register[1]); // 000 110 101
+        X(register[0]); // 100 010 001
     }
 
 
@@ -290,14 +336,14 @@ namespace MITRE.QSD.L03 {
     ///
     ///  Index  |  Value
     /// ------- | -------
-    ///    0    |    1
-    ///    1    |   1/√2
-    ///    2    |    0
-    ///    3    |  -1/√2
-    ///    4    |   -1
-    ///    5    |  -1/√2
-    ///    6    |    0
-    ///    7    |   1/√2
+    ///    0    |    1     1/4    000
+    ///    1    |   1/√2.  1/8    001
+    ///    2    |    0.    0.     010
+    ///    3    |  -1/√2   -1/8   011
+    ///    4    |   -1.    -1/4.  100
+    ///    5    |  -1/√2.  -1/8.  101
+    ///    6    |    0     0      110
+    ///    7    |   1/√2.  1/8.   111
     ///
     /// Note that these samples are not normalized; if they were used directly
     /// as amplitudes, they would result in a total probability greater than 1.
@@ -320,8 +366,30 @@ namespace MITRE.QSD.L03 {
     /// faster than classical computers once we get to quantum algorithms, but
     /// this is a good first hint.
     operation C03_EncodeCosine (register : Qubit[]) : Unit {
-        // TODO
-        fail "Not implemented.";
+        // TODO (1/4) 000  (1/8) 001  (1/8) -011  (1/4) -100  (1/8) -101  (1/8) 111
+        // 000
+        let q1 = register[0];
+        let q2 = register[1];
+        let q3 = register[2];
+
+
+        // H(q1); // 100 000
+        // Controlled H([q1], q3); // (100 101) 000
+        // Controlled H([q3], q2); // (100 (101 111)) 000
+        // Controlled Z([q1, q2], q3); // (100 (101 -111)) 000
+        
+        // X(register[0]); // (000 (001 -011)) 100
+        // Controlled H([q1], q3); // (000 (001 -011)) (100 101)
+        // Controlled H([q3], q2); // (000 (001 -011)) (100 (101 111))
+        // Z(q1); // (000 (001 -011)) (-100 (-101 -111))
+        // Controlled Z([q1, q2], q3); // (000 (001 -011)) (-100 (-101 111))
+
+
+        H(q1); // 000 100
+        H(q3); // (000 001) (100 101)
+        Controlled H([q3], q2); // (000 (001 011)) (100 (101 111))
+        Z(q2);
+        Z(q1);
     }
 
 
@@ -332,14 +400,14 @@ namespace MITRE.QSD.L03 {
     ///
     ///  Index  |  Value
     /// ------- | -------
-    ///    0    |    0
-    ///    1    |   1/√2
-    ///    2    |    1
-    ///    3    |   1/√2
-    ///    4    |    0
-    ///    5    |  -1/√2
-    ///    6    |   -1
-    ///    7    |  -1/√2
+    ///    0    |    0.    0     000
+    ///    1    |   1/√2.  1/8.  001
+    ///    2    |    1     1/4.  010
+    ///    3    |   1/√2.  1/8.  011
+    ///    4    |    0     0     100
+    ///    5    |  -1/√2.  1/8.  101
+    ///    6    |   -1     1/4.  110
+    ///    7    |  -1/√2.  1/8   111
     ///
     /// Once again, these values aren't normalized, so you will have to
     /// normalize them before using them as state amplitudes.
@@ -348,7 +416,19 @@ namespace MITRE.QSD.L03 {
     /// ## register
     /// A three-qubit register in the |000> state.
     operation C04_EncodeSine (register : Qubit[]) : Unit {
-        // TODO
-        fail "Not implemented.";
+        // TODO (010 (001 011)) -(110 (101 111))
+        // 000
+
+        let q1 = register[0];
+        let q2 = register[1];
+        let q3 = register[2];
+
+        H(q1); // 000 100
+        H(q3); // (000 110)
+        Controlled H([q3], q2); // (000 (001 011)) (100 (101 111))
+        X(q3); // (001 (000 010)) (101 (100) (110))
+        CX(q3, q2); // (011 (000 010)) (111 (100 110))
+        X(q3); // (010 (001 011)) (110 (101 111))
+        Z(q1);
     }
 }

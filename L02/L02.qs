@@ -32,9 +32,9 @@ namespace MITRE.QSD.L02 {
         // Tip: You can use the IntAsDouble() function to cast an integer to
         // a double for floating-point arithmetic. Q# won't let you do
         // arithmetic between Doubles and Ints directly.
-        
-        // TODO
-        for qubit in qubits {
+
+        for i in 0 .. Length(qubits) - 1 {
+            Ry(IntAsDouble(i) * PI()/12.0, qubits[i]);
         }
     }
 
@@ -66,8 +66,19 @@ namespace MITRE.QSD.L02 {
         // operator, or append each Int to the array as you go. Use whichever
         // method you prefer.
         
-        // TODO
-        fail "Not implemented.";
+        mutable newArr = [0, size = Length(qubits)];
+        mutable result = Zero;
+
+        for i in 0 .. Length(qubits) - 1 {
+            set result = M(qubits[i]);
+
+            if (result == Zero) {
+                set newArr w/= i <- 0;
+            } else {
+                set newArr w/= i <- 1;
+            }
+        }
+        return newArr;
     }
 
     /// # Summary
@@ -90,8 +101,9 @@ namespace MITRE.QSD.L02 {
     /// register is in a combination of all possible measurement outcomes, and
     /// each superposition term has an equal amplitude to the others.
     operation E03_PrepareUniform (register : Qubit[]) : Unit {
-        // TODO
-        fail "Not implemented.";
+        for qubit in register {
+            H(qubit);
+        }
     }
 
     /// # Summary
@@ -114,7 +126,13 @@ namespace MITRE.QSD.L02 {
     /// state and tests your understanding of using integers for register
     /// values.
     operation E04_PhaseFlipOddTerms (register : Qubit[]) : Unit {
-        // TODO
-        fail "Not implemented.";
+        let n = Length(register);
+    
+        // for i in 0 .. n - 1 {
+        //     if i % 2 == 1 {
+        //         Z(register[i]);
+        //     }
+        // }
+        Z(register[n-1]);
     }
 }

@@ -97,8 +97,28 @@ namespace MITRE.QSD.L06 {
         op : ((Qubit[], Qubit[]) => Unit),
         input : Bool[]
     ) : Bool[] {
-        // TODO
-        fail "Not implemented.";
+        let inpLen = Length(input);
+
+        use (r1, r2) = (Qubit[inpLen], Qubit[inpLen]);
+        
+        for i in 0 .. inpLen - 1 {
+            if input[i] {
+                X(r1[i]);
+            }
+        }
+
+        op(r1, r2);
+
+        mutable outArr = [false, size=0];
+
+        for i in 0 .. inpLen - 1 {
+            set outArr += [M(r2[i]) == One];
+        }
+
+        ResetAll(r1);
+        ResetAll(r2);
+
+        return outArr;
     }
 
 
@@ -127,7 +147,21 @@ namespace MITRE.QSD.L06 {
         inputSize : Int
     ) : Bool[] {
         // TODO
-        fail "Not implemented.";
+        use (r1, r2) = (Qubit[inputSize], Qubit[inputSize]);
+        ApplyToEach(H, r1);
+        op(r1, r2);
+        ApplyToEach(H, r1);
+
+        mutable outArr = [false, size=0];
+
+        for i in 0 .. inputSize - 1 {
+            set outArr += [M(r1[i]) == One];
+        }
+
+        ResetAll(r1);
+        ResetAll(r2);
+
+        return outArr;
     }
 
 
@@ -162,7 +196,14 @@ namespace MITRE.QSD.L06 {
     /// that result, then you've implemented it properly.
     operation C01_RightShiftBy1 (input : Qubit[], output : Qubit[]) : Unit {
         // TODO
-        fail "Not implemented.";
+        // let l = Length(input); // ABC 000
+        // SWAP(input[l-1], output[0]); // AB0 C00
+        // for i in 1 .. Length(input) - 1 {
+        //     SWAP(input[l-1-i], output[i]);
+        // }
+        for i in 0..Length(input)-2 {
+            CNOT(input[i], output[i+1]);
+        }
     }
 
 
@@ -197,6 +238,7 @@ namespace MITRE.QSD.L06 {
     /// variants of the X gate (CNOT and CCNOT).
     operation C02_SimonBB (input : Qubit[], output : Qubit[]) : Unit {
         // TODO
-        fail "Not implemented.";
+        CX(input[1], output[0]);
+        CX(input[2], output[1]);
     }
 }

@@ -21,7 +21,7 @@ namespace MITRE.QSD.L01 {
     /// This investigates how to apply quantum gates to qubits in Q#.
     operation E01_BitFlip (target: Qubit) : Unit {
         // TODO
-        fail "Not implemented.";
+        X(target);
     }
 
     /// # Summary
@@ -40,7 +40,9 @@ namespace MITRE.QSD.L01 {
     /// # Remarks
     /// This investigates how to prepare the |+> and |-> states.
     operation E02_PrepPlusMinus (targetA : Qubit, targetB : Qubit) : Unit {
-        // TODO
-        fail "Not implemented.";
+        H(targetA);
+        
+        X(targetB);
+        H(targetB);
     }
 }
