@@ -36,7 +36,11 @@ namespace MITRE.QSD.L07 {
     operation E01_XOR (classicalBits : Bool[], register : Qubit[]) : Unit
     is Adj {
         // TODO
-        fail "Not implemented.";
+        for i in 0 .. Length(classicalBits) - 1 {
+            if classicalBits[i] {
+                X(register[i]);
+            }
+        }
     }
 
 
@@ -58,8 +62,9 @@ namespace MITRE.QSD.L07 {
         register : Qubit[],
         target : Qubit
     ) : Unit {
-        // TODO
-        fail "Not implemented.";
+        ApplyToEach(X, register);
+        Controlled Z(register, target);
+        ApplyToEach(X, register);
     }
 
 
@@ -113,7 +118,9 @@ namespace MITRE.QSD.L07 {
         // its original state.
 
         // TODO
-        fail "Not implemented.";
+        E01_XOR(originalMessage, candidateEncryptionKey);
+        E01_XOR(encryptedMessage, candidateEncryptionKey);
+        E02_CheckIfAllZeros(candidateEncryptionKey, target);
     }
 
 
