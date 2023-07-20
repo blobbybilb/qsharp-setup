@@ -31,8 +31,32 @@ namespace MITRE.QSD.L08 {
         //  1. Your implementation of register reversal in Lab 2, Exercise 2.
         //  2. The Microsoft.Quantum.Intrinsic.R1Frac() gate.
 
-        // TODO
-        fail "Not implemented.";
+        
+        
+        // for i in 0 .. Length(register!) - 1 {
+        //     H(register![i]);
+        //     for j in i + 1 .. 0 {
+        //     // R1Frac(2.0 * PI() / (2.0 ^ (j - i + 1)), register![j], register![i]);
+        //     // Controlled R1Frac - qubit i+1
+        //     }
+        // }
+
+        // for i in 0 .. Length(register!)/2 - 1 {
+        //     SWAP(register![i], register![Length(register!) - i - 1]);
+        // }
+
+        for i in 0 .. Length(register!) - 1 {
+            H(register![i]);
+            for j in i + 1 .. Length(register!) - 1 {
+                // target: register[i] - control: register[j] - R2
+                Controlled R1Frac([register![j]], (2, j-i+1, register![i]));
+            }
+        }
+
+        for i in 0 .. Length(register!)/2 - 1 {
+            SWAP(register![i], register![Length(register!) - i - 1]);
+        }
+    
     }
 
 
@@ -72,7 +96,20 @@ namespace MITRE.QSD.L08 {
         register : BigEndian,
         sampleRate : Double
     ) : Double {
-        // TODO
-        fail "Not implemented.";
+        Adjoint E01_QFT(register);
+
+        for i in 0 .. Length(register!)/2 - 1 {
+            SWAP(register![i], register![Length(register!) - i - 1]);
+        }
+        
+        mutable res = ResultArrayAsInt(MultiM(register!));
+
+        if res > 2 ^ (Length(register!) - 1) {
+            set res = 2 ^ Length(register!) - res;
+        }
+
+        let freq = IntAsDouble(res) * sampleRate / IntAsDouble(2^Length(register!));
+
+        return freq;
     }
 }

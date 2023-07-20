@@ -39,8 +39,10 @@ namespace MITRE.QSD.L10 {
         // this operation, so it can just be run backwards to decode the
         // logical qubit back into the original three unentangled qubits.
 
-        // TODO
-        fail "Not implemented.";
+        // TODO 000 111
+        // 0 1
+        Controlled X([original], spares[0]); // 00 11
+        Controlled X([original], spares[1]);
     }
 
 
@@ -73,7 +75,21 @@ namespace MITRE.QSD.L10 {
         // back to the |0> state!
 
         // TODO
-        fail "Not implemented.";
+        use (q1, q2) = (Qubit(), Qubit());
+        CX(register[0], q1);
+        CX(register[1], q1);
+        CX(register[0], q2);
+        CX(register[2], q2);
+
+        let result1 = M(q1);
+        let result2 = M(q2);
+        
+        ResetAll([q1, q2]);
+
+
+        return [result1, result2];
+
+
     }
 
 
@@ -106,7 +122,18 @@ namespace MITRE.QSD.L10 {
         // of the qubit you identified as broken to help with debugging.
 
         // TODO
-        fail "Not implemented.";
+        if (syndromeMeasurement[1] == One and syndromeMeasurement[0] == One) {
+            X(register[0]);
+            return ();
+        }
+
+        if (syndromeMeasurement[1] == One) {
+            X(register[2]);
+        }
+
+        if (syndromeMeasurement[0] == One) {
+            X(register[1]);
+        }
     }
 
 
@@ -132,7 +159,26 @@ namespace MITRE.QSD.L10 {
         spares : Qubit[]
     ) : Unit is Adj {
         // TODO
-        fail "Not implemented.";
+        let (q1, q2, q3, q4, q5, q6) = (spares[0], spares[1], spares[2], spares[3], spares[4], spares[5]);
+
+        H(q4);
+        H(q5);
+        H(q6);
+
+        CX(original, q1);
+        CX(original, q2);
+
+        CX(q6, original);
+        CX(q6, q1);
+        CX(q6, q3);
+        
+        CX(q5, original);
+        CX(q5, q2);
+        CX(q5, q3);
+        
+        CX(q4, q1);
+        CX(q4, q2);
+        CX(q4, q3);
     }
 
 
@@ -154,7 +200,36 @@ namespace MITRE.QSD.L10 {
     /// produces.
     operation E05_SteaneBitSyndrome (register : Qubit[]) : Result[] {
         // TODO
-        fail "Not implemented.";
+        let (q1, q2, q3, q4, q5, q6, q7) = (register[0], register[1], register[2], register[3], register[4], register[5], register[6]);
+        use (r1, r2, r3) = (Qubit(), Qubit(), Qubit());
+
+        // for qa in [q1, q3, q5, q7] {
+        //     CX(qa, r1);
+        // }
+        CX(q1, r1);
+        CX(q3, r1);
+        CX(q5, r1);
+        CX(q7, r1);
+
+
+        // for qb in [q2, q3, q6, q7] {
+        //     CX(qb, r2);
+        // }
+        CX(q2, r2);
+        CX(q3, r2);
+        CX(q6, r2);
+        CX(q7, r2);
+
+        // for qc in [q4, q5, q6, q7] {
+        //     CX(qc, r3);
+        // }
+        CX(q4, r3);
+        CX(q5, r3);
+        CX(q6, r3);
+        CX(q7, r3);
+
+        // ResetAll([r1, r2, r3]);
+        return [M(r3), M(r2), M(r1)];
     }
 
 
@@ -176,7 +251,26 @@ namespace MITRE.QSD.L10 {
     /// produces.
     operation E06_SteanePhaseSyndrome (register : Qubit[]) : Result[] {
         // TODO
-        fail "Not implemented.";
+        let (q1, q2, q3, q4, q5, q6, q7) = (register[0], register[1], register[2], register[3], register[4], register[5], register[6]);
+        use (r1, r2, r3) = (Qubit(), Qubit(), Qubit());
+
+        ApplyToEachA(H, [r1, r2, r3]);
+
+        for q in [q1, q3, q5, q7] {
+            CX(r1, q);
+        }
+
+        for q in [q2, q3, q6, q7] {
+            CX(r2, q);
+        }
+
+        for q in [q4, q5, q6, q7] {
+            CX(r3, q);
+        }
+
+        ApplyToEachA(H, [r1, r2, r3]);
+
+        return [M(r3), M(r2), M(r1)];
     }
 
 
@@ -216,8 +310,16 @@ namespace MITRE.QSD.L10 {
     /// classical method. It doesn't have any quantum parts to it, just lots
     /// of regular old classical math and logic.
     function E07_SyndromeToIndex (syndrome : Result[]) : Int {
-        // TODO
-        fail "Not implemented.";
+        return IndexOf(e -> EqualA(((a, b) -> a == b), Mapped(f -> f == One ? 1 | 0, syndrome), e), [
+            [0, 0, 0],
+            [0, 0, 1],
+            [0, 1, 0],
+            [0, 1, 1],
+            [1, 0, 0],
+            [1, 0, 1],
+            [1, 1, 0],
+            [1, 1, 1]
+        ]) - 1;
     }
 
 
@@ -243,7 +345,15 @@ namespace MITRE.QSD.L10 {
     /// bunch of different original qubit states. Don't worry if it doesn't
     /// immediately finish!
     operation E08_SteaneCorrection (register : Qubit[]) : Unit {
-        // TODO
-        fail "Not implemented.";
+        let bitFlipIndex = E07_SyndromeToIndex(E05_SteaneBitSyndrome(register));
+        let phaseFlipIndex = E07_SyndromeToIndex(E06_SteanePhaseSyndrome(register));
+
+        if (bitFlipIndex > -1) {
+            X(register[bitFlipIndex]);
+        }
+
+        if (phaseFlipIndex > -1) {
+            Z(register[phaseFlipIndex]);
+        }
     }
 }

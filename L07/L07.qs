@@ -121,6 +121,8 @@ namespace MITRE.QSD.L07 {
         E01_XOR(originalMessage, candidateEncryptionKey);
         E01_XOR(encryptedMessage, candidateEncryptionKey);
         E02_CheckIfAllZeros(candidateEncryptionKey, target);
+        Adjoint E01_XOR(encryptedMessage, candidateEncryptionKey);
+        Adjoint E01_XOR(originalMessage, candidateEncryptionKey);
     }
 
 
@@ -154,7 +156,12 @@ namespace MITRE.QSD.L07 {
         target : Qubit
     ) : Unit {
         // TODO
-        fail "Not implemented.";
+        oracle(register, target);
+        ApplyToEach(H, register);
+        ApplyToEach(X, register);
+        Controlled Z(register, target);
+        ApplyToEach(X, register);
+        ApplyToEach(H, register);
     }
 
 
@@ -188,6 +195,17 @@ namespace MITRE.QSD.L07 {
         let numIterations = Round(PI() / 4.0 * Sqrt(N));
 
         // TODO
-        fail "Not implemented.";
+        use (input, target) = (Qubit[numberOfQubits], Qubit());
+        X(target);
+        ApplyToEach(H, input);
+
+        for i in 1..numIterations {
+            E04_GroverIteration(oracle, input, target);
+        }
+
+        let result = ResultArrayAsBoolArray(MultiM(input));
+        ResetAll(input);
+        Reset(target);
+        return result;
     }
 }

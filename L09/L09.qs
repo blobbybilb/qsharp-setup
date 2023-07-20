@@ -43,9 +43,54 @@ namespace MITRE.QSD.L09 {
         // exponent classically. You can use the
         // Microsoft.Quantum.Arithmetic.MultiplyByModularInteger() function to
         // do an in-place quantum modular multiplication.
+        X(output[(Length(output) - 1)]);
+        // Message("------");
+        // mutable x = LittleEndian(input);
+        for i in Length(input) - 1 .. -1 .. 0 {
+            // Message(IntAsString(i));
+            Controlled MultiplyByModularInteger(
+                [input[i]],
+                ( 
+                    ExpModI(a, 2 ^ (Length(input) - i - 1), b),
+                    b,
+                    LittleEndian(output)
+                )
+            );
+        }
+    }
 
-        // TODO
-        fail "Not implemented.";
+
+    operation E01_QFT (register : BigEndian) : Unit is Adj + Ctl {
+        // Hint: There are two operations you may want to use here:
+        //  1. Your implementation of register reversal in Lab 2, Exercise 2.
+        //  2. The Microsoft.Quantum.Intrinsic.R1Frac() gate.
+
+        
+        
+        // for i in 0 .. Length(register!) - 1 {
+        //     H(register![i]);
+        //     for j in i + 1 .. 0 {
+        //     // R1Frac(2.0 * PI() / (2.0 ^ (j - i + 1)), register![j], register![i]);
+        //     // Controlled R1Frac - qubit i+1
+        //     }
+        // }
+
+        // for i in 0 .. Length(register!)/2 - 1 {
+        //     SWAP(register![i], register![Length(register!) - i - 1]);
+        // }
+
+        for i in 0 .. Length(register!) - 1 {
+            H(register![i]);
+            for j in i + 1 .. Length(register!) - 1 {
+                // target: register[i] - control: register[j] - R2
+                Controlled R1Frac([register![j]], (2, j-i+1, register![i]));
+            }
+        }
+
+        for i in 0 .. Length(register!)/2 - 1 {
+            SWAP(register![i], register![Length(register!) - i - 1]);
+        }
+    
     }
 
 
@@ -90,7 +135,37 @@ namespace MITRE.QSD.L09 {
         // see what values you came up with versus what the system expects.
 
         // TODO
-        fail "Not implemented.";
+        // mutable n = Ceiling(Log(IntAsDouble(numberToFactor))/Log(IntAsDouble(2)));
+        // use (input, output) = (Qubit[2 * n], Qubit[n]);
+        // ApplyToEach(H, input);
+        // E01_ModExp(guess, numberToFactor, input, output);
+
+        
+
+        // Adjoint E01_QFT(BigEndian(input));
+
+        // for i in 0 .. Length(input)/2 - 1 {
+        //     SWAP(input[i], input[Length(input) - i - 1]);
+        // }
+
+        // mutable num = MeasureInteger((LittleEndian(input)));
+
+        // ResetAll(input);
+        // ResetAll(output);
+
+        // return (num, 2^(2*n));
+
+        let length = Ceiling(Log(IntAsDouble(numberToFactor)) / Log(2.0));
+        use (input, output) = (Qubit[2 * length], Qubit[length]);
+
+        ApplyToEach(H, input);
+        E01_ModExp(guess, numberToFactor, input, output);
+        Adjoint E01_QFT(BigEndian(input));
+        
+        let measurement = MeasureInteger(BigEndianAsLittleEndian(BigEndian(input)));
+        ResetAll(input);
+        ResetAll(output);
+        return (measurement, 2^(2*length));
     }
 
 
@@ -123,7 +198,31 @@ namespace MITRE.QSD.L09 {
         denominatorThreshold : Int
     ) : (Int, Int) {
         // TODO
-        fail "Not implemented.";
+
+        // ==============
+
+        mutable (p, q) = (denominator, numerator % denominator);
+        mutable (a, r) = (numerator / denominator, numerator % denominator);
+        mutable (n, d) = ([1, numerator / denominator], [0, 1]);
+
+        mutable i = 1;
+        while r != 0 and d[i] < denominatorThreshold {
+            set i += 1;
+
+            set a = p / q;
+            set r = p % q;
+
+            set n += [a * n[i - 1] + n[i - 2]];
+            set d += [a * d[i - 1] + d[i - 2]];
+
+            set p = q;
+            set q = r;
+        }
+
+        if d[i] > denominatorThreshold {
+            set i -= 1;
+        }
+        return (n[i], d[i]);
     }
 
 
@@ -157,8 +256,27 @@ namespace MITRE.QSD.L09 {
         // Microsoft.Quantum.Math.GreatestCommonDivisorI()
         // function to calculate the GCD of two numbers.
 
-        // TODO
-        fail "Not implemented.";
+
+        let (n, d) = E02_FindApproxPeriod(numberToFactor, guess);
+        let (num2, q) = E03_FindPeriodCandidate(n, d, numberToFactor);
+        let res = ExpModI(guess, q, numberToFactor);
+        if (res == 1) {
+            return q;
+        }
+
+        let d_o = q;
+
+        let (n2, d2) = E02_FindApproxPeriod(numberToFactor, guess);
+        let (num3, q2) = E03_FindPeriodCandidate(n2, d2, numberToFactor);
+        let res2 = ExpModI(guess, q2, numberToFactor);
+        if (res2 == 1) {
+            return q2;
+        }
+
+        let d_n = q2;
+        let factor = (d_o * d_n) / GreatestCommonDivisorI(d_o, d_n);
+
+        return factor;
     }
 
 
@@ -186,11 +304,23 @@ namespace MITRE.QSD.L09 {
     /// - If the period is odd, return -1.
     /// - If the period doesn't work for factoring, return -2.
     function E05_FindFactor (
-        numberToFactor : Int,
-        guess : Int,
+        numberToFactor : Int, // b
+        guess : Int, // a
         period : Int
     ) : Int {
         // TODO
-        fail "Not implemented.";
+        if numberToFactor % 2 == 0 {
+            return 2;
+        }
+
+        let gcd = GreatestCommonDivisorI(guess, numberToFactor);
+
+        if gcd == 1 {
+            return gcd;
+        }
+
+        if period % 2 == 1 {
+            return -1;
+        }
     }
 }
