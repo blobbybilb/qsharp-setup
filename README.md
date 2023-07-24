@@ -1,3 +1,17 @@
+## My codespace setup for doing the intro exercises in the MIT Beaver Works Quantum Software course I took in Summer 2023
+(made because the QDK doesn't work on ARM)
+(if you aren't looking to use Q# with .NET 6 in a codespace you should probably ignore this)
+
+### Info
+- .NET 6
+- QDK vscode extension
+
+### README from Exercises
+
+---
+
+
+
 # Intro to Quantum Software Development
 
 Copyright 2023 The MITRE Corporation. All Rights Reserved.
